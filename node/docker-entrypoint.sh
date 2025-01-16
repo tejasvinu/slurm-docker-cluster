@@ -1,4 +1,10 @@
 #!/bin/bash
+set -ex
+
+# Create /run/munge with correct permissions
+sudo mkdir -p /run/munge
+sudo chown munge:munge /run/munge
+sudo chmod 0711 /run/munge
 
 echo "[DEBUG] Starting node docker-entrypoint.sh"
 echo "[DEBUG] Current directory: $(pwd)"
@@ -30,8 +36,7 @@ sudo chmod 400 /etc/munge/munge.key
 
 # Start munge with debug output
 echo "[DEBUG] Starting munge"
-sudo -u munge /usr/sbin/munged -F &
-sleep 2
+sudo service munge start
 
 # Verify munge is working
 echo "[DEBUG] Testing munge"

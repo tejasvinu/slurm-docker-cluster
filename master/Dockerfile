@@ -11,17 +11,20 @@ RUN apt-get update -y \
   slurmctld \
   slurmrestd \
   munge \
+  slurm-auth-jwt \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -g 995 slurm && \
-    useradd -r -u 995 -g slurm slurm && \
-    useradd -r -u 996 -g slurm slurmrestd && \
-    mkdir -p /var/spool/slurmctld /etc/slurm/jwt /etc/slurm/dockerhelp /var/log/slurm && \
+RUN groupadd -g 995 slurm || true && \
+    useradd -r -u 995 -g slurm slurm || true && \
+    useradd -r -u 996 -g slurm slurmrestd || true && \
+    mkdir -p /var/spool/slurmctld /etc/slurm/jwt /var/log/slurm && \
     chown slurm:slurm /var/spool/slurmctld /var/log/slurm /etc/slurm/jwt && \
-    chmod 755 /var/spool/slurmctld /var/log/slurm
+    chmod 755 /var/spool/slurmctld /var/log/slurm && \
+    chmod 700 /etc/slurm/jwt
 
 COPY ./docker-entrypoint.sh /etc/slurm/dockerhelp/
+COPY slurm-rest.conf /etc/slurm/dockerhelp/slurm-rest.conf
 RUN chmod +rx /etc/slurm/dockerhelp/docker-entrypoint.sh
 
 EXPOSE 6820

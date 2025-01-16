@@ -14,7 +14,6 @@ services:
   slurmmaster:
         image: slurm-master:latest
         hostname: slurmmaster
-        user: admin
         volumes:
                 - ./shared:/home/admin/shared
                 - munge-key:/etc/munge:rw
@@ -30,7 +29,7 @@ services:
         volumes:
                 - ./shared:/home/admin/shared
                 - munge-key:/etc/munge:ro
-                - jwt-key:/etc/slurm/jwt:ro
+                # Remove JWT volume mount for nodes
         networks:
                 - slurmnet
         depends_on:

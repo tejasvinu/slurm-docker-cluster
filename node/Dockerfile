@@ -14,12 +14,10 @@ RUN apt-get update -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -g 995 slurm && \
-    useradd -r -u 995 -g slurm slurm && \
-    useradd -r -u 996 -g slurm slurmrestd
-
+# Remove user creation since they exist in base
 RUN mkdir -p /var/spool/slurmd \
-    && mkdir -p /etc/slurm/dockerhelp
+    && mkdir -p /etc/slurm/dockerhelp \
+    && chown slurm:slurm /var/spool/slurmd
 
 COPY docker-entrypoint.sh /etc/slurm/dockerhelp/
 RUN chmod +rx /etc/slurm/dockerhelp/docker-entrypoint.sh
