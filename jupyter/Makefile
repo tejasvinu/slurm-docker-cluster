@@ -1,7 +1,7 @@
 .PHONY: allclean
 
-image_done: Makefile Dockerfile docker-entrypoint.sh
-	docker buildx build -t slurm-jupyter:latest --no-cache .
+image_done: Dockerfile docker-entrypoint.sh
+	docker buildx build -t slurm-jupyter:latest .
 	touch image_done
 
 allclean:

@@ -1,33 +1,21 @@
-.PHONY: images base-image master-image node-image jupyter-image clean allclean reallyallclean
+.PHONY: all clean allclean
 
-images: master-image node-image jupyter-image
+all: base/image_done master/image_done node/image_done jupyter/image_done
 
-base-image: Makefile
-	cd base && $(MAKE)
+base/image_done:
+	cd base && make
 
-master-image: base-image
-	cd master && $(MAKE)
+master/image_done: base/image_done
+	cd master && make
 
-node-image: base-image
-	cd node && $(MAKE)
+node/image_done: base/image_done
+	cd node && make
 
-jupyter-image: base-image
-	cd jupyter && $(MAKE)
+jupyter/image_done: base/image_done
+	cd jupyter && make
 
 clean:
-	docker system prune
-	cd shared && $(MAKE) clean
+	-rm */image_done
 
-allclean:
-	docker system prune -a
-	cd base && $(MAKE) allclean
-	cd master && $(MAKE) allclean
-	cd node && $(MAKE) allclean
-	cd jupyter && $(MAKE) allclean
-
-reallyallclean: allclean
-	# Be carefull - will clean ALL containers, images, volumes, etc....
-	# Also stuff unrelated to this project
-	# But docker seem to have a bug where it doesn't correctly remove old unused layers, images, etc.,
-	# so in particular /var/lib/docker/overlay2 grows to two digit GB sizes that doesn't get cleaned up by allclean
-	rm -rf /var/lib/docker/* && apt install --reinstall docker.io
+allclean: clean
+	-docker rmi slurm-base:latest slurm-master:latest slurm-node:latest slurm-jupyter:latest

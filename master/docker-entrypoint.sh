@@ -1,15 +1,27 @@
 #!/bin/bash
+set -ex
 
-# Set CPUs etc in slurm.conf - the same for all docker containers
-sudo /etc/slurm/dockerhelp/fix_cpu_in_slurmconf.sh
+# Copy REST config
+mkdir -p /etc/slurm/conf.d
+cp /etc/slurm/dockerhelp/slurm-rest.conf /etc/slurm/conf.d/
 
-sudo service munge start
+# Setup munge
+dd if=/dev/urandom bs=1 count=1024 of=/etc/munge/munge.key
+chown -R munge:munge /etc/munge /var/run/munge /var/lib/munge
+chmod 400 /etc/munge/munge.key
+service munge start
 
-# Store munge.key so it is available for the other nodes
-sudo mkdir -p ~admin/shared/mungesetup && sudo chmod u+rwx,go+rx ~admin/shared/mungesetup
-sudo cp -a /etc/munge/munge.key ~admin/shared/mungesetup
+# Setup JWT
+dd if=/dev/urandom of=/etc/slurm/jwt/jwt_hs256.key bs=32 count=1
+chown slurm:slurm /etc/slurm/jwt/jwt_hs256.key
+chmod 600 /etc/slurm/jwt/jwt_hs256.key
 
-sudo service ssh start
-sudo service slurmctld start
+# Start services
+service slurmctld start
+sleep 2
 
-tail -f /dev/null
+# Start REST daemon
+sudo -u slurm /usr/sbin/slurmrestd -vvv ${SLURMRESTD_HOST}:${SLURMRESTD_PORT} &
+
+# Keep container running
+exec tail -f /var/log/slurm/slurmctld.log

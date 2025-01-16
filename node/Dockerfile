@@ -10,12 +10,18 @@ RUN apt-get update -y \
   && apt-get install -y \
   slurmd \
   slurm-client \
+  munge \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /var/spool/slurmd
+RUN groupadd -g 995 slurm && \
+    useradd -r -u 995 -g slurm slurm && \
+    useradd -r -u 996 -g slurm slurmrestd
 
-COPY docker-entrypoint.sh /etc/slurm/dockerhelp
+RUN mkdir -p /var/spool/slurmd \
+    && mkdir -p /etc/slurm/dockerhelp
+
+COPY docker-entrypoint.sh /etc/slurm/dockerhelp/
 RUN chmod +rx /etc/slurm/dockerhelp/docker-entrypoint.sh
 
 ENTRYPOINT ["/etc/slurm/dockerhelp/docker-entrypoint.sh"]
